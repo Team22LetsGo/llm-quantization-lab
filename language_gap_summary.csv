@@ -1,0 +1,5 @@
+condition,mean_D_gap_pp,positive_gap_groups,n_groups
+FP16,0.0,0,3
+GPTQ English 4bit,13.696549671224615,3,3
+GPTQ Korean 4bit,-5.9937954788906,0,3
+RTN 4bit,7.464905236935933,3,3
