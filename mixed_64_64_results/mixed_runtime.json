@@ -1,0 +1,19 @@
+{
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "condition": "GPTQ Mixed 64:64 4bit",
+  "seed": 22,
+  "calibration_en": 64,
+  "calibration_ko": 64,
+  "gptq": {
+    "bits": 4,
+    "group_size": 128,
+    "sym": true,
+    "desc_act": false
+  },
+  "torch": "2.14.1+cu130",
+  "transformers": "5.22.1",
+  "gptqmodel": "7.10.0",
+  "gpu": "Tesla T4",
+  "pilot_samples_sha256": "762e9a33457824598b73e49812666c3fb042f25df24a09db094ffc2a04590ed6",
+  "pilot_ppl_sha256": "c43eac5403a94c6bc2b9b65ece149e55cb31d4030e57cb97ffe2d9a5520694a0"
+}
