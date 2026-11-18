@@ -1,0 +1,9 @@
+{
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "wiki_revision": "ad5752b5e625abfcdeefe5ae0ad2c3721c4b2619",
+  "seed": 22,
+  "torch": "2.14.1+cu130",
+  "transformers": "5.22.1",
+  "gptqmodel": "7.10.0",
+  "gpu": "Tesla T4"
+}
