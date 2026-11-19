@@ -1,0 +1,2 @@
+﻿model_id,sample_sha256,torch,transformers,gpu,screen_group,screen_tokens_per_language,validation_groups,validation_tokens_per_group,layer_candidates,head_candidates,generated_utc
+Qwen/Qwen2.5-1.5B-Instruct,762e9a33457824598b73e49812666c3fb042f25df24a09db094ffc2a04590ed6,2.14.1+cu130,5.22.1,Tesla T4,1,512,"2,3",8192,6,10,2026-11-19T08:35:31.324938+00:00
