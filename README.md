@@ -1,5 +1,9 @@
 # LLM Quantization Lab
 
+## 헤드 분석
+
+[`헤드분석_Qwen2.5-1.5B_Colab.ipynb`](헤드분석_Qwen2.5-1.5B_Colab.ipynb)은 Colab GPU에서 실행합니다. `pilot_results/pilot_samples.json`을 업로드하면 1.5B FP16 모델의 레이어와 헤드를 차례로 탐색하고, 1번 평가 묶음에서 찾은 후보를 2·3번 묶음으로 검증합니다. 실행이 끝나면 결과 CSV를 브라우저로 다운로드합니다. 노트북에는 실행 결과가 포함돼 있지 않습니다.
+
 `Qwen/Qwen2.5-1.5B-Instruct`의 4bit 양자화가 한국어와 영어의 다음 토큰 예측에 미치는 영향을 비교합니다. 예비 결과를 바탕으로 후속 연구 방향은 **한국어 품질 개선**으로 정했습니다.
 
 ## 예비 실험
