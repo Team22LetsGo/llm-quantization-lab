@@ -115,3 +115,51 @@ Colab T4 실행 결과는 [`mixed_64_64_results`](mixed_64_64_results)에 저장
 | 영어 64개 + 한국어 64개 | 10.26 | 7.47% | 15.03 | 9.01% |
 
 혼합 보정은 한국어만 보정한 모델보다 한국어 저하율이 1.25%p 높았지만 영어 저하율은 3.21%p 낮았습니다. 영어만 보정한 모델과 비교하면 한국어 저하율이 14.28%p 낮고 영어 저하율은 0.96%p 높았습니다. 이 방향은 세 평가 묶음 모두에서 같았습니다. 따라서 혼합 보정은 두 언어 사이의 절충안이지만, **한국어 PPL만 보면 한국어 전용 보정이 가장 좋았습니다**. 세 묶음의 PPL 결과만으로 실제 한국어 대화 품질이나 일반적인 개선을 단정하지 않습니다.
+
+## Drive 데이터 재실험 실행
+
+기존 실험의 모델과 CSV를 보존하면서 Drive 데이터로 다시 평가하려면 아래 순서로 실행합니다. **Colab 런타임을 T4 GPU로 설정**하세요.
+
+1. 입력 파일이 필요하면 [Drive데이터_실험입력준비_Colab.ipynb](Drive데이터_실험입력준비_Colab.ipynb)를 실행합니다. Drive의 한국어·영어 `train`/`validation`/`test` CSV 6개와 `pilot_results/pilot_samples.json`을 업로드하면 `drive_study_inputs_v1.json`이 다운로드됩니다. 이 저장소가 있는 로컬 Team22 폴더에는 검증된 입력 파일 `../drive_study_inputs_v1.json`도 있습니다.
+2. [Drive데이터_양자화전체재실험_Colab.ipynb](Drive데이터_양자화전체재실험_Colab.ipynb)를 Colab에서 열고 첫 셀부터 실행합니다. 업로드 창에는 `drive_study_inputs_v1.json` 하나를 선택합니다. FP16, RTN, 기존 보정 GPTQ 3조건, Drive `train` 보정 GPTQ 3조건을 같은 새 `validation`/`test` 입력에서 평가합니다. 체크포인트는 Colab의 `/content/team22_drive_retest/quantized/drive_eval_*`에 조건별로 저장되고, 결과는 `drive_quantization_*.csv`로 브라우저에서 다운로드됩니다.
+3. [Drive데이터_헤드전체재실험_Colab.ipynb](Drive데이터_헤드전체재실험_Colab.ipynb)를 Colab GPU에서 실행하고 같은 입력 JSON을 업로드합니다. `validation`에서 레이어·헤드 마스킹과 전체 헤드 기울기로 후보를 찾고, 고정된 후보를 `test`에서 검증합니다. `drive_head_*.csv`를 브라우저에서 각각 다운로드합니다.
+
+입력 JSON의 SHA-256은 `421c7934584f463d4cd003aa43173d9151a7a79987f20003d43c7c9a1221b8fc`입니다. 기존 보정과 Drive `train` 보정은 별도 조건이며, 체크포인트 이름도 겹치지 않습니다. Colab 런타임의 체크포인트는 종료 시 사라지므로 재사용하려면 종료 전에 별도로 보관해야 합니다.
+
+### 양자화 재실험 결과
+
+**탐색 방법.** `Qwen/Qwen2.5-1.5B-Instruct`의 FP16, RTN 4bit, GPTQ 4bit 여섯 조건을 동일한 Drive `validation`·`test` 평가 토큰에서 비교했습니다. GPTQ는 영어·한국어·한영 64:64 혼합 보정을 각각 기존 `pilot_samples.json`과 Drive `train`에서 준비해 총 여섯 모델을 따로 만들었습니다. 각 분할·언어에 8192토큰 묶음 3개를 사용하고, 각 묶음을 512토큰 구간으로 나눠 8176개 예측 토큰의 평균 NLL에서 PPL을 계산했습니다. 아래 `D`는 **같은 분할·언어·묶음의 FP16 대비 PPL 증가율**이며, 표의 PPL과 D는 각각 세 묶음 값의 산술평균입니다. 낮을수록 좋습니다.
+
+| 파일 | 행 | 내용 |
+| --- | ---: | --- |
+| [drive_quantization_ppl_by_group.csv](drive_quantization_results/drive_quantization_ppl_by_group.csv) | 96 | 8조건 × 2분할 × 2언어 × 3묶음의 PPL·D 원자료 |
+| [drive_quantization_summary.csv](drive_quantization_results/drive_quantization_summary.csv) | 32 | 분할·조건·언어별 3묶음 평균 |
+| [drive_quantization_progress.csv](drive_quantization_results/drive_quantization_progress.csv) | 60 | 실행 도중 저장된 FP16·RTN·기존 보정 GPTQ 3조건의 중간 결과; 최종 분석은 96행 파일을 사용 |
+| [drive_quantization_runtime.json](drive_quantization_results/drive_quantization_runtime.json) | — | 모델·입력/원본 해시, Torch/Transformers/GPTQModel 버전, Tesla T4 정보 |
+
+**검증 결과.** `validation`과 별도 `test`의 모든 조건을 비교한 결과입니다. 한국어·영어 PPL 원점수는 서로 다른 말뭉치에서 나왔으므로 언어 간에 직접 비교하지 않습니다.
+
+| 보정/모델 | validation 한국어 PPL | 한국어 D | validation 영어 PPL | 영어 D | test 한국어 PPL | 한국어 D | test 영어 PPL | 영어 D |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| FP16 | 11.87 | 0.00% | 18.49 | 0.00% | 11.34 | 0.00% | 19.50 | 0.00% |
+| RTN 4bit | 14.98 | 26.23% | 22.29 | 20.50% | 14.23 | 25.43% | 23.56 | 20.84% |
+| GPTQ 기존 영어 보정 | 14.37 | 21.02% | 20.11 | 8.74% | 13.57 | 19.60% | 21.11 | 8.26% |
+| GPTQ 기존 한국어 보정 | 12.59 | 6.12% | 20.88 | 12.96% | 11.90 | **4.90%** | 22.00 | 12.80% |
+| GPTQ 기존 64:64 혼합 | 12.73 | 7.23% | 19.91 | 7.68% | 12.09 | 6.55% | 21.08 | 8.13% |
+| GPTQ Drive 영어 보정 | 14.49 | 22.06% | 19.74 | 6.74% | 13.90 | 22.56% | 20.81 | **6.75%** |
+| GPTQ Drive 한국어 보정 | 12.66 | 6.64% | 20.72 | 12.04% | 12.03 | 6.10% | 22.01 | 12.86% |
+| GPTQ Drive 64:64 혼합 | 12.83 | 8.06% | 19.88 | 7.51% | 12.12 | 6.86% | 21.00 | 7.68% |
+
+같은 보정 언어에서 **Drive 보정 − 기존 보정**의 `test` D 차이는 다음과 같습니다. 음수는 Drive 보정 모델의 저하율이 더 낮다는 뜻입니다.
+
+| 보정 언어 | 한국어 D 차이 (%p) | 영어 D 차이 (%p) |
+| --- | ---: | ---: |
+| 영어 | +2.96 | −1.51 |
+| 한국어 | +1.20 | +0.06 |
+| 한영 64:64 | +0.31 | −0.45 |
+
+Drive 영어 보정과 기존 영어 보정을 묶음별로 비교하면 `test`의 영어 D는 3묶음 모두 낮고 한국어 D는 3묶음 모두 높습니다. Drive 한국어 보정의 한국어 D도 기존 한국어 보정보다 3묶음 모두 높습니다. Drive 혼합 보정의 영어 D는 기존 혼합 보정보다 3묶음 모두 낮지만, 한국어 차이는 3묶음 중 2묶음에서 높습니다.
+
+**해석.** 한국어 평가만 보면 기존 한국어 보정 GPTQ의 `test` D가 **4.90%**로 가장 낮고, Drive 한국어 보정은 6.10%입니다. 영어 평가만 보면 Drive 영어 보정이 **6.75%**로 가장 낮지만, 같은 모델의 한국어 D는 22.56%입니다. Drive 혼합 보정은 한국어 6.86%·영어 7.68%로 두 언어 저하율을 함께 낮게 유지합니다. RTN보다 모든 GPTQ 조건의 D가 두 언어에서 낮습니다. 같은 방향은 `validation` 표에서도 대체로 확인되지만, 한국어 전용·영어 전용·혼합 중 어느 조건을 택할지는 실제 목표에 달려 있습니다.
+
+기존 보정은 긴 Wikipedia 문서 128개, Drive 보정은 여러 `train` 문장을 이어 만든 512토큰 구간 128개입니다. 따라서 위 차이는 **원천 데이터와 표본 구성 방식이 함께 바뀐 결과**이며 Drive 데이터 자체의 우열로 단정할 수 없습니다. 문장 중복은 공백 정규화 뒤 정확히 같은 텍스트만 제외했습니다. 이전 예비 실험과 이번 실험도 평가 표본이 달라 PPL·D 수치를 직접 비교할 수 없습니다. `test`에서 가장 낮은 조건을 사후에 고른 것이므로 이를 확정하려면 새로운 평가 표본이 필요합니다. 언어별 3묶음의 PPL 측정만으로 통계적 유의성이나 실제 대화 품질을 입증하지 않습니다. 별도 Drive 헤드 분석 결과 CSV는 아직 이 폴더에 없습니다.
