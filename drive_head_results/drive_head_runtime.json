@@ -1,0 +1,30 @@
+{
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "input_sha256": "421c7934584f463d4cd003aa43173d9151a7a79987f20003d43c7c9a1221b8fc",
+  "source_sha256": {
+    "pilot_samples.json": "762e9a33457824598b73e49812666c3fb042f25df24a09db094ffc2a04590ed6",
+    "korean_train.csv": "7e1ecf1777609eb2dc9bac21b6c4214a53806965d6894f48914ab30904cf37aa",
+    "korean_validation.csv": "cb76123930e3ce4b2c39be468cda470998f13018ea3b745ffc0e221918d438a6",
+    "korean_test.csv": "4071b8205aedf860d7199bce829813aed666973a2de8091a2ef4d0998b4cb29c",
+    "english_train.csv": "2b90082ddc9ff9993a3b2e8ecfd6baa5a606176a44bc8bfc6e20a62dd9558b21",
+    "english_validation.csv": "bd256b3c4ca12ab46a903cd9a095cbf4738924a89f01e103ff1a745fa3b1373c",
+    "english_test.csv": "a973971069d061631e8a5702698b2d0bd26d6dc6b5151174be5af16ddf082e3e"
+  },
+  "gpu": "Tesla T4",
+  "torch": "2.14.1+cu130",
+  "transformers": "5.22.1",
+  "selection_split": "validation",
+  "test_split": "test",
+  "test_groups_per_language": 3,
+  "test_tokens_per_group": 8192,
+  "mask_selected_layers": [
+    0,
+    1,
+    3,
+    21,
+    22,
+    23
+  ],
+  "candidate_count": 18,
+  "generated_utc": "2026-11-22T09:16:18.774883+00:00"
+}
